@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WebcomicNotify": {
+      "commandName": "Project",
+      "commandLineArgs": "add -u https://flamescans.org/series/?status=&type=Manhwa&order="
+    }
+  }
+}
