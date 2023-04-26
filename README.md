@@ -11,7 +11,7 @@ Or
 `webcomicnotify add webtoon omniscient reader`  
 
 Run the app with the required arguments  
-`webcomicnotify --webhook https://discord.com/api/webhooks/1099231472440836106/MIZNFz2PQPV2gELvrEB3Seq2UTfYCkKGdnJ1PvQsA2YVZVDL41bwYtGe7wCIx1CnvUEe`  
+`webcomicnotify --webhook https://discord.com/api/webhooks/{guild_id}/{webhook_id}`  
 
 Then sit back and relax!
 
