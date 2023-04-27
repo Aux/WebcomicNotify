@@ -22,11 +22,13 @@ Required: The default webhook to post notifications to.
 Optional: How often in minutes the service will poll for new chapters. [default: 60]  
 
 ### Commands  
-`add, new`  
-Add a webcomic to the polling service.  
-`check, force`  
-Force a check to run without the polling service.  
 `list, ls`  
 Show a list of all configured webcomics.  
+`check, force`  
+Force a check to run without the polling service.  
+`latest`  
+Post the latest chapter from a feed, regardless of whether it's already been posted.  
 `del, delete, remove`  
 Remove a webcomic from the polling service.  
+`add, new`  
+Add a webcomic to the polling service.  

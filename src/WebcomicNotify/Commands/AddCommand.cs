@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using WebcomicNotify.Services;
@@ -19,48 +20,33 @@ namespace WebcomicNotify.Commands
             Aliases.Add("new");
             Options.Add(Url);
             Options.Add(Webhook);
+            Subcommands.Add(new AddWebtoonCommand());
+            Subcommands.Add(new AddFlamescanCommand());
+            Subcommands.Add(new AddAsurascanCommand());
 
             Action = CommandHandler.Create<ParseResult, IHost>(ExecuteAsync);
         }
 
-        private async Task<int> ExecuteAsync(ParseResult result, IHost host)
+        protected virtual async Task<int> ExecuteAsync(ParseResult result, IHost host)
         {
-            var data = host.Services.GetRequiredService<DataService>();
-            var url = result.GetValue(Url);
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            var logger = host.Services.GetRequiredService<ILogger<AddCommand>>();
+            var finder = host.Services.GetRequiredService<FeedFinderService>();
+
+            var rss = result.GetValue(Url);
+            if (!Uri.TryCreate(rss, UriKind.Absolute, out var rssUrl))
             {
-                await Console.Error.WriteLineAsync($"The value `{url}` is not a valid url.");
-                return 0;
+                logger.LogError("The value `{url}` is not a valid url.", rssUrl);
+                return 1;
             }
 
-            Uri.TryCreate(result.GetValue(Webhook), UriKind.Absolute, out var webhookUri);
-
-            switch (uri.Host)
+            var customWebhook = result.GetValue(Webhook);
+            if (customWebhook != null && !Uri.TryCreate(customWebhook, UriKind.Absolute, out var webhookUri))
             {
-                case WebcomicConstants.WebtoonsHost:
-                    /*
-                     * - Scrapes results from https://www.webtoons.com/en/search?keyword= for matching comics and displays them to the user.
-                     * - Follow link in result and scrape for rss feed page.
-                     */
-                    break;
-                case WebcomicConstants.FlamescansHost:
-                    /*
-                     * - Scrapes results from https://flamescans.org/?s= for matching comics and displays them to the user.
-                     * - Pull title from result and regex match with global feed.
-                     */
-                    break;
-                case WebcomicConstants.AsurascansHost:
-                    /*
-                     * - Scrapes results from https://www.asurascans.com/?s= for matching comics and displays them to the user.
-                     * - Pull title from result and regex match with global feed.
-                     */
-                    break;
-                default:
-                    break;
+                logger.LogError("The value `{customWebhook}` is not a valid url.", customWebhook);
+                return 1;
             }
 
-
-            await Console.Out.WriteLineAsync($"Ok I'll add {uri}");
+            await finder.FindAsync(rssUrl);
             return 0;
         }
     }
