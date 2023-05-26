@@ -3,9 +3,10 @@
     public enum WebcomicType
     {
         Other,
-        Webtoons,
-        Flamescans,
-        Asurascans
+        Webtoon,
+        Wordpress,
+        Flamescan,
+        Asurascan
     }
 
     public class Webcomic : IEntity

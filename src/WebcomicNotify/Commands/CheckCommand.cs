@@ -1,48 +1,25 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
-using WebcomicNotify.Models;
-using WebcomicNotify.Services;
+﻿using Microsoft.Extensions.Logging;
 
-namespace WebcomicNotify.Commands
+namespace WebcomicNotify.Commands;
+
+public class CheckCommand : ConsoleAppBase
 {
-    public class CheckCommand : CliCommand
+    private readonly ILogger _logger;
+
+    public CheckCommand(ILogger<CheckCommand> logger)
     {
-        public CliArgument<string?> Webcomic =
-            new("webcomic") { Description = "Limit the check to only a single specific comic.", DefaultValueFactory = result => null };
+        _logger = logger;
+    }
 
-        public CheckCommand()
-            : base("check", "Force a check to run without the polling service.")
-        {
-            Aliases.Add("force");
-            Arguments.Add(Webcomic);
+    [Command(new[] { "check", "force" }, "Skip the polling service's queue and force a poll to run.")]
+    public Task CheckAsync()
+    {
+        return Task.CompletedTask;
+    }
 
-            Action = CommandHandler.Create<ParseResult, IHost>(ExecuteAsync);
-        }
-
-        private async Task<int> ExecuteAsync(ParseResult result, IHost host)
-        {
-            var value = result.GetValue(Webcomic);
-
-            if (value != null)
-            {
-                var data = host.Services.GetRequiredService<DataService>();
-
-                var webcomic = data.Get<Webcomic>(x => x.Id == value || x.Name.ToLower() == value.ToLower()).SingleOrDefault();
-                if (webcomic == null)
-                {
-                    await Console.Error.WriteLineAsync($"The value `{value}` does not reference a configured webcomic.");
-                    return 1;
-                }
-
-                // Execute check here
-                await Console.Out.WriteLineAsync($"Execute check for {webcomic.Name} ({webcomic.Id})");
-                return 0;
-            }
-
-            await Console.Out.WriteLineAsync($"Execute checks for all configured comics.");
-            return 0;
-        }
+    [Command(new[] { "check", "force" }, "Skip the polling service's queue and force a poll to run for a specific webcomic.")]
+    public Task CheckAsync(string name)
+    {
+        return Task.CompletedTask;
     }
 }

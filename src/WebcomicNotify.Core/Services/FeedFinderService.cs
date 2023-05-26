@@ -32,7 +32,7 @@ namespace WebcomicNotify.Services
         ///     displays them to the user.
         ///     Follow link in result and scrape for rss feed page.
         /// </summary>
-        public Task FindWebtoonAsync(string text)
+        public Task FindWithWebtoonAsync(string text)
         {
             return Task.CompletedTask;
         }
@@ -41,16 +41,7 @@ namespace WebcomicNotify.Services
         ///     Scrapes results from https://flamescans.org/?s= for matching comics and displays them to the user.
         ///     Pull title from result and regex match with global feed.
         /// </summary>
-        public Task FindFlamescanAsync(string text)
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        ///     Scrapes results from https://www.asurascans.com/?s= for matching comics and displays them to the user.
-        ///     Pull title from result and regex match with global feed.
-        /// </summary>
-        public Task FindAsurascanAsync(string text)
+        public Task FindWithWordpressAsync(string text)
         {
             return Task.CompletedTask;
         }

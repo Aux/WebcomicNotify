@@ -1,37 +1,29 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.CommandLine.Hosting;
 using WebcomicNotify;
-using WebcomicNotify.Services;
+using ZLogger;
 
-var hostBuilder = Host.CreateDefaultBuilder()
-    .ConfigureLogging(options =>
+var app = ConsoleApp.CreateBuilder(args, options =>
     {
-        options.AddSimpleConsole(options => options.SingleLine = true);
+        options.ApplicationName = "Webcomic Notify";
+        options.NameConverter = x => x.ToLower();
+    })
+    .ConfigureAppConfiguration(config =>
+    {
+        config.AddYamlFile("_config.yml", false);
+    })
+    .ConfigureLogging(logging =>
+    {
+        logging.ClearProviders();
+        logging.AddZLoggerConsole();
+        logging.AddZLoggerRollingFile((dt, x) => $"logs/console/{dt.ToLocalTime():yyyy-MM-dd}_{x:000}.log", x => x.ToLocalTime().Date, 1024);
     })
     .ConfigureServices(services =>
     {
-        services.AddSingleton<DataService>();
-        services.AddTransient<FeedFinderService>();
-    });
+        services.AddWebcomicServices();
+    })
+    .Build();
 
-var cli = new CliConfiguration(new RootCommand())
-{
-    ProcessTerminationTimeout = null
-}.UseHost(_ => hostBuilder);
+app.AddAllCommandType();
 
-// There's no way to disable cli.ProcessTerminationTimeout so we
-// have to do this mess to run the host service.
-var result = cli.Parse(args);
-
-if (result.CommandResult.Command is not RootCommand root)
-    await result.InvokeAsync();
-else
-{
-    // Executing the root command directly disables help, so we
-    // return 2 if it detects the help command arguments
-    int r = await root.ExecuteAsync(result, hostBuilder.Build());
-    if (r == 2) cli.Invoke(args);
-}
+await app.RunAsync();

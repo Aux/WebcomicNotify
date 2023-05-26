@@ -1,53 +1,37 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
-using WebcomicNotify.Services;
+﻿using Microsoft.Extensions.Logging;
 
-namespace WebcomicNotify.Commands
+namespace WebcomicNotify.Commands;
+
+[Command(new[] { "add", "new" }, "Add a webcomic to the polling service.")]
+public class AddCommand : ConsoleAppBase
 {
-    public class AddCommand : CliCommand
+    private readonly ILogger _logger;
+
+    public AddCommand(ILogger<AddCommand> logger)
     {
-        public CliOption<string> Url { get; }
-            = new("--url", "-u") { Description = "A url that points to the webcomic's page, or directly to the rss feed." };
-        public CliOption<string> Webhook { get; }
-            = new("--webhook", "-w") { Description = "A custom webhook url if not using the globally specified one.", Required = false };
+        _logger = logger;
+    }
 
-        public AddCommand()
-            : base("add", "Add a webcomic to the polling service.")
-        {
-            Aliases.Add("new");
-            Options.Add(Url);
-            Options.Add(Webhook);
-            Subcommands.Add(new AddWebtoonCommand());
-            Subcommands.Add(new AddFlamescanCommand());
-            Subcommands.Add(new AddAsurascanCommand());
+    public Task BaseAsync(string url, string? webhookUrl = null)
+    {
+        return Task.CompletedTask;
+    }
 
-            Action = CommandHandler.Create<ParseResult, IHost>(ExecuteAsync);
-        }
+    [Command("webtoons")]
+    public Task QueryWebtoonsAsync(string query)
+    {
+        return Task.CompletedTask;
+    }
 
-        protected virtual async Task<int> ExecuteAsync(ParseResult result, IHost host)
-        {
-            var logger = host.Services.GetRequiredService<ILogger<AddCommand>>();
-            var finder = host.Services.GetRequiredService<FeedFinderService>();
+    [Command("asurascans")]
+    public Task QueryAsurascansAsync(string query)
+    {
+        return Task.CompletedTask;
+    }
 
-            var rss = result.GetValue(Url);
-            if (!Uri.TryCreate(rss, UriKind.Absolute, out var rssUrl))
-            {
-                logger.LogError("The value `{url}` is not a valid url.", rssUrl);
-                return 1;
-            }
-
-            var customWebhook = result.GetValue(Webhook);
-            if (customWebhook != null && !Uri.TryCreate(customWebhook, UriKind.Absolute, out var webhookUri))
-            {
-                logger.LogError("The value `{customWebhook}` is not a valid url.", customWebhook);
-                return 1;
-            }
-
-            await finder.FindAsync(rssUrl);
-            return 0;
-        }
+    [Command("flamescans")]
+    public Task QueryFlamescansAsync(string query)
+    {
+        return Task.CompletedTask;
     }
 }

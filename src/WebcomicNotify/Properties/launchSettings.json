@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "WebcomicNotify": {
-      "commandName": "Project",
-      "commandLineArgs": "run -w https://flamescans.org/feed/"
-    }
-  }
-}
